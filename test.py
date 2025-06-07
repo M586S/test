@@ -16,12 +16,12 @@ CREATE TABLE IF NOT EXISTS users (
 ''')
 
 # Insert some data into the table
-cursor.execute("INSERT INTO users (name, age) VALUES ('Alice', 30)")
-cursor.execute("INSERT INTO users (name, age) VALUES ('Bob', 25)")
-cursor.execute("INSERT INTO users (name, age) VALUES ('Charlie', 35)")
+#cursor.execute("INSERT INTO users (name, age) VALUES ('Alice', 30)")
+#cursor.execute("INSERT INTO users (name, age) VALUES ('Bob', 25)")
+#cursor.execute("INSERT INTO users (name, age) VALUES ('Charlie', 35)")
 
 # Commit the changes to the database
-conn.commit()
+#conn.commit()
 
 # Select the data from the table
 cursor.execute("SELECT * FROM users")
