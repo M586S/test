@@ -1,38 +1,65 @@
-import sqlite3
+from pathlib import Path
 
-# Connect to a database (it will create the database file if it doesn't exist)
-conn = sqlite3.connect('example.db')
+from instagrapi import Client
+from instagrapi.exceptions import LoginRequired
+import logging
 
-# Create a cursor object to interact with the database
-cursor = conn.cursor()
+logger = logging.getLogger()
+SESSION_FILE_NAME = 'session.json'
+USERNAME = 'danniel_ksong'
+PASSWORD = 'Mario@123*'
 
-# Create a table
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    age INTEGER
-)
-''')
+def login_user():
+    """
+    Attempts to login to Instagram using either the provided session information
+    or the provided username and password.
+    """
 
-# Insert some data into the table
-#cursor.execute("INSERT INTO users (name, age) VALUES ('Alice', 30)")
-#cursor.execute("INSERT INTO users (name, age) VALUES ('Bob', 25)")
-#cursor.execute("INSERT INTO users (name, age) VALUES ('Charlie', 35)")
+    cl = Client()
+    session = None
 
-# Commit the changes to the database
-#conn.commit()
+    if Path(SESSION_FILE_NAME).exists():
+        session = cl.load_settings(Path(SESSION_FILE_NAME))
 
-# Select the data from the table
-cursor.execute("SELECT * FROM users")
+    login_via_session = False
+    login_via_pw = False
 
-# Fetch all the rows
-rows = cursor.fetchall()
+    if session:
+        print('Logging in to Instagram via session...')
+        login_via_session = True
+        try:
+            cl.set_settings(session)
+            cl.login(USERNAME, PASSWORD)
 
-# Print the data
-print("Inserted Data:")
-for row in rows:
-    print(row)
+            # check if session is valid
+            try:
+                cl.get_timeline_feed()
+            except LoginRequired:
+                logger.error("Session is invalid, need to login via username and password")
 
-# Close the connection
-conn.close()
+                old_session = cl.get_settings()
+
+                # use the same device uuids across logins
+                cl.set_settings({})
+                cl.set_uuids(old_session["uuids"])
+
+                cl.login(USERNAME, PASSWORD)
+            login_via_session = True
+        except Exception as e:
+            logger.error("Couldn't login user using session information: %s" % e)
+
+    if not login_via_session:
+        try:
+            before_ip = cl._send_public_request("https://api.ipify.org/")
+            print(before_ip)
+            logger.error("Attempting to login via username and password. username: %s" % USERNAME)
+            if cl.login(USERNAME, PASSWORD):
+                login_via_pw = True
+        except Exception as e:
+            logger.error("Couldn't login user using username and password: %s" % e)
+
+    if not login_via_pw and not login_via_session:
+        raise Exception("Couldn't login user with either password or session")
+
+if __name__ == '__main__':
+    login_user()
