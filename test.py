@@ -1,4 +1,67 @@
-from pathlib import Path
+from telegram import Update, ReplyKeyboardMarkup, KeyboardButton
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+
+TOKEN = "8079819165:AAGHWs6jVunYUNcKlyOmKKgrLNYMVJ6mzzA"
+
+# /start affiche le clavier principal
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [KeyboardButton("Help"), KeyboardButton("Profile")]
+    ]
+    reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+    await update.message.reply_text("Bienvenue sur SMMTasker !", reply_markup=reply_markup)
+
+# Gestion des messages texte envoyés via le clavier
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = update.message.text
+
+    if text == "Help":
+        await update.message.reply_text("Voici l'aide ...")
+
+    elif text == "Profile":
+        keyboard = [
+            [KeyboardButton("Modifier")],
+            [KeyboardButton("Retour au menu principal")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Votre profil :", reply_markup=reply_markup)
+
+    elif text == "Modifier":
+        await update.message.reply_text("Fonction modification en cours...")
+
+    elif text == "Retour au menu principal":
+        keyboard = [
+            [KeyboardButton("Help"), KeyboardButton("Profile")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        await update.message.reply_text("Retour au menu principal.", reply_markup=reply_markup)
+
+    else:
+        await update.message.reply_text("Je n'ai pas compris.")
+
+def main():
+    app = Application.builder().token(TOKEN).build()
+
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+
+
+
+
+
+"""from pathlib import Path
 
 from instagrapi import Client
 from instagrapi.exceptions import LoginRequired
@@ -10,10 +73,6 @@ USERNAME = 'danniel_ksong'
 PASSWORD = 'Mario@123*'
 
 def login_user():
-    """
-    Attempts to login to Instagram using either the provided session information
-    or the provided username and password.
-    """
 
     cl = Client()
     session = None
@@ -63,3 +122,4 @@ def login_user():
 
 if __name__ == '__main__':
     login_user()
+"""
