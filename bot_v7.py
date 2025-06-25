@@ -13,6 +13,19 @@ from telethon.tl.types import KeyboardButtonCallback
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+REQUIRED_PACKAGES = [
+    "telethon",
+    "python-telegram-bot"
+]
+
+def install_missing_packages():
+    for package in REQUIRED_PACKAGES:
+        try:
+            __import__(package)
+        except ImportError:
+            print(f"[⚙️] Installation de {package}...")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
 class TelegramBotManager:
     def __init__(self, bot_name: str, api_id: int, api_hash: str, message: str, session_dir: str = "telegram_sessions"):
         self.bot_name = bot_name
@@ -251,4 +264,5 @@ def main():
     app.run_polling()
 
 if __name__ == "__main__":
+    install_missing_packages()
     main()
